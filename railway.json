@@ -1,0 +1,39 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "mvn clean package -DskipTests"
+  },
+  "deploy": {
+    "startCommand": "java -jar target/book-system-0.0.1-SNAPSHOT.jar",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 30,
+    "restartPolicyType": "ON_FAILURE"
+  },
+  "variables": {
+    "PORT": {
+      "description": "Port to run the application",
+      "value": "8086"
+    },
+    "SPRING_DATASOURCE_URL": {
+      "description": "Database URL",
+      "value": "jdbc:h2:file:./book_system;MODE=MySQL"
+    },
+    "SPRING_DATASOURCE_USERNAME": {
+      "description": "Database username",
+      "value": "sa"
+    },
+    "SPRING_DATASOURCE_PASSWORD": {
+      "description": "Database password",
+      "value": ""
+    },
+    "SPRING_SQL_INIT_MODE": {
+      "description": "Database initialization mode",
+      "value": "never"
+    },
+    "JAVA_OPTS": {
+      "description": "Java options",
+      "value": "-Xmx256m"
+    }
+  }
+}

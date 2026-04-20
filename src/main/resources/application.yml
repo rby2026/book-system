@@ -1,0 +1,52 @@
+server:
+  port: ${PORT:8086}
+  shutdown: graceful
+
+spring:
+  datasource:
+    url: jdbc:h2:file:./book_system;MODE=MySQL
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  sql:
+    init:
+      mode: never
+      schema-locations: classpath:db/init-h2.sql
+      encoding: UTF-8
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  main:
+    web-application-type: servlet
+    allow-bean-definition-overriding: true
+    lazy-initialization: false
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.example.booksystem.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      table-prefix: t_
+
+jwt:
+  tokenHeader: Authorization
+  secret: book-system-secret
+  expiration: 604800
+  tokenHead: Bearer
+
+isbn:
+  key: d6df3e8cc2427a45d786251dff2325bc
+
+logging:
+  level:
+    com.example.booksystem.security: info
