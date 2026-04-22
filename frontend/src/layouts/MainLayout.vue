@@ -173,18 +173,18 @@ const handleLogout = () => {
     top: 0;
     bottom: 0;
     z-index: 10;
-    overflow-y: auto; /* 侧边栏自身过长时可滚动 */
+    overflow-y: auto;
 }
 
 /* 主布局添加左边距避免侧边栏遮挡 */
 .main-layout > .ant-layout {
-  margin-left: 200px; /* 与侧边栏宽度一致 */
+  margin-left: 200px;
   transition: margin-left 0.2s;
 }
 
 /* 侧边栏折叠时的适配 */
 .sidebar.ant-layout-sider-collapsed + .ant-layout {
-  margin-left: 80px; /* 折叠后的侧边栏宽度 */
+  margin-left: 80px;
 }
 
 .logo {
@@ -257,7 +257,7 @@ const handleLogout = () => {
 
 .content {
   overflow-y: auto;
-  height: calc(100vh - 64px - 70px); /* 视口高度 - header高度 - footer高度 */
+  height: calc(100vh - 64px - 70px);
   margin: 24px;
   padding: 24px;
   background: #fff;

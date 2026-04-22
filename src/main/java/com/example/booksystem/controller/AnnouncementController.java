@@ -5,6 +5,7 @@ import com.example.booksystem.entity.Announcement;
 import com.example.booksystem.service.AnnouncementService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -35,6 +36,7 @@ public class AnnouncementController {
      * 添加公告
      */
     @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result addAnnouncement(@RequestBody Announcement announcement) {
         return Result.success(announcementService.addAnnouncement(announcement));
     }
@@ -43,6 +45,7 @@ public class AnnouncementController {
      * 更新公告
      */
     @PutMapping("/update")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result updateAnnouncement(@RequestBody Announcement announcement) {
         return Result.success(announcementService.updateAnnouncement(announcement));
     }
@@ -51,6 +54,7 @@ public class AnnouncementController {
      * 删除公告
      */
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result deleteAnnouncement(@PathVariable Long id) {
         return Result.success(announcementService.deleteAnnouncement(id));
     }
