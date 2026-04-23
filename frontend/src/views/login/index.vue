@@ -75,6 +75,13 @@
                                 :prefix="h(PhoneOutlined)" class="input-field" />
                         </a-form-item>
 
+                        <a-form-item name="userType" label="用户类型">
+                            <a-radio-group v-model:value="registerForm.userType">
+                                <a-radio :value="0">学生</a-radio>
+                                <a-radio :value="1">教师</a-radio>
+                            </a-radio-group>
+                        </a-form-item>
+
                         <a-form-item>
                             <a-button type="primary" html-type="submit" :loading="registerLoading" block size="large" class="register-button">
                                 注册
@@ -126,7 +133,8 @@ const registerForm = reactive({
     password: '',
     confirmPassword: '',
     email: '',
-    phone: ''
+    phone: '',
+    userType: 0
 })
 
 // 登录表单验证规则

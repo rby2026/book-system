@@ -67,6 +67,13 @@ public class UserController {
         return Result.success(result, "修改成功");
     }
 
+    @ApiOperation("更新用户类型")
+    @PutMapping("/userType")
+    public Result<Boolean> updateUserType(@RequestParam Integer userType) {
+        boolean result = userService.updateUserType(userType);
+        return Result.success(result, "更新成功");
+    }
+
     @ApiOperation("获取用户列表（管理员）")
     @GetMapping("/list")
     @PreAuthorize("hasRole('ADMIN')")

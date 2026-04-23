@@ -360,4 +360,39 @@ onMounted(() => {
 .rules-container :deep(.ant-table-bordered .ant-table-thead > tr > th) {
     border-color: #b4d3f7;
 }
+
+/* 表格样式 */
+.rules-container :deep(.ant-table) {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.rules-container :deep(.ant-table-thead > tr > th) {
+    background-color: #f0f8ff;
+    font-weight: 600;
+}
+
+.rules-container :deep(.ant-table-tbody > tr:hover > td) {
+    background-color: #f0f8ff;
+}
+
+.rules-container :deep(.ant-table-tbody > tr > td) {
+    transition: background-color 0.3s ease;
+}
+
+/* 当前生效规则样式 */
+.current-rule {
+    background: #f0f8ff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 规则列表样式 */
+.rule-list {
+    background: #f0f8ff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 </style>

@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS t_user (
     phone VARCHAR(20),
     email VARCHAR(100),
     role INT DEFAULT 0,
+    user_type INT DEFAULT 0,
     status INT DEFAULT 1,
     create_time DATETIME,
     update_time DATETIME,
@@ -105,6 +106,16 @@ CREATE TABLE IF NOT EXISTS t_announcement (
     PRIMARY KEY (id)
 );
 
+-- 打卡记录表
+CREATE TABLE IF NOT EXISTS t_check_in (
+    id BIGINT AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    check_in_date DATE NOT NULL,
+    create_time DATETIME,
+    PRIMARY KEY (id),
+    UNIQUE (user_id, check_in_date)
+);
+
 -- 违章信息表
 CREATE TABLE IF NOT EXISTS t_violation (
     id BIGINT AUTO_INCREMENT,
@@ -128,11 +139,11 @@ INSERT INTO t_borrow_rule (name, borrow_days, max_renew_count, renew_days, max_b
 VALUES ('默认规则', 30, 1, 15, 5, 0.5, 1, NOW(), NOW());
 
 -- 插入示例用户数据
-INSERT INTO t_user (username, password, real_name, phone, email, role, status, create_time, update_time) VALUES
-('user1', '$2a$10$KMZ4MTzx9wAML47PNh2yPOmzgFoBqjEYNGqfqYFtzNfpDUq3K4lxa', '张三', '13800138001', 'zhangsan@example.com', 0, 1, NOW(), NOW()),
-('user2', '$2a$10$KMZ4MTzx9wAML47PNh2yPOmzgFoBqjEYNGqfqYFtzNfpDUq3K4lxa', '李四', '13800138002', 'lisi@example.com', 0, 1, NOW(), NOW()),
-('admin', '$2a$10$KMZ4MTzx9wAML47PNh2yPOmzgFoBqjEYNGqfqYFtzNfpDUq3K4lxa', '管理员', '13800138003', 'admin@qq.com', 1, 1, NOW(), NOW()),
-('librarian', '$2a$10$KMZ4MTzx9wAML47PNh2yPOmzgFoBqjEYNGqfqYFtzNfpDUq3K4lxa', '王五', '13800138004', 'wangwu@example.com', 1, 1, NOW(), NOW());
+INSERT INTO t_user (username, password, real_name, phone, email, role, user_type, status, create_time, update_time) VALUES
+('user1', '$2a$10$KMZ4MTzx9wAML47PNh2yPOmzgFoBqjEYNGqfqYFtzNfpDUq3K4lxa', '张三', '13800138001', 'zhangsan@example.com', 0, 0, 1, NOW(), NOW()),
+('user2', '$2a$10$KMZ4MTzx9wAML47PNh2yPOmzgFoBqjEYNGqfqYFtzNfpDUq3K4lxa', '李四', '13800138002', 'lisi@example.com', 0, 1, 1, NOW(), NOW()),
+('admin', '$2a$10$KMZ4MTzx9wAML47PNh2yPOmzgFoBqjEYNGqfqYFtzNfpDUq3K4lxa', '管理员', '13800138003', 'admin@qq.com', 1, 1, 1, NOW(), NOW()),
+('librarian', '$2a$10$KMZ4MTzx9wAML47PNh2yPOmzgFoBqjEYNGqfqYFtzNfpDUq3K4lxa', '王五', '13800138004', 'wangwu@example.com', 1, 1, 1, NOW(), NOW());
 
 -- 插入示例图书数据
 INSERT INTO t_book (title, author, publisher, isbn, category, sub_category, location, status, description, cover_url, total_count, available_count, borrow_count, publish_date, pages, price, language, version, call_number, stock_date, last_borrow_date, create_time, update_time) VALUES

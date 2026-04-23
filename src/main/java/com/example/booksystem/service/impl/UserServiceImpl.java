@@ -61,6 +61,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setPhone(userRegisterDTO.getPhone());
         user.setEmail(userRegisterDTO.getEmail());
         user.setRole(0); // 默认为普通用户
+        user.setUserType(userRegisterDTO.getUserType() != null ? userRegisterDTO.getUserType() : 0); // 设置用户类型，默认为学生
         user.setStatus(1); // 默认启用
         user.setCreateTime(new Date());
         user.setUpdateTime(new Date());
@@ -156,5 +157,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
         return userVO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateUserType(Integer userType) {
+        // 获取当前登录用户
+        UserVO currentUser = getCurrentUser();
+        User user = getById(currentUser.getId());
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        // 更新用户类型
+        user.setUserType(userType);
+        user.setUpdateTime(new Date());
+
+        return updateById(user);
     }
 }

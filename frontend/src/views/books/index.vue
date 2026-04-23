@@ -11,26 +11,33 @@
 
       <!-- 搜索区域 -->
       <div class="search-area mb-4">
-        <a-form layout="inline" :model="searchForm">
-          <a-form-item label="书名">
-            <a-input v-model:value="searchForm.title" placeholder="请输入书名" allowClear />
-          </a-form-item>
-          <a-form-item label="作者">
-            <a-input v-model:value="searchForm.author" placeholder="请输入作者" allowClear />
-          </a-form-item>
-          <a-form-item label="ISBN">
-            <a-input v-model:value="searchForm.isbn" placeholder="请输入ISBN" allowClear />
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" @click="handleSearch">
-              <search-outlined />
-              搜索
-            </a-button>
-            <a-button class="ml-2" @click="resetSearch">
-              重置
-            </a-button>
-          </a-form-item>
-        </a-form>
+        <div class="search-card">
+          <a-form layout="inline" :model="searchForm" class="search-form">
+            <a-form-item label="书名" class="search-item">
+              <a-input v-model:value="searchForm.title" placeholder="请输入书名" allowClear />
+            </a-form-item>
+            <a-form-item label="作者" class="search-item">
+              <a-input v-model:value="searchForm.author" placeholder="请输入作者" allowClear />
+            </a-form-item>
+            <a-form-item label="ISBN" class="search-item">
+              <a-input v-model:value="searchForm.isbn" placeholder="请输入ISBN" allowClear />
+            </a-form-item>
+            <a-form-item class="search-actions">
+              <a-button type="primary" @click="handleSearch" class="search-button">
+                <template #icon>
+                  <SearchOutlined />
+                </template>
+                查询
+              </a-button>
+              <a-button class="reset-button" @click="resetSearch">
+                <template #icon>
+                  <ReloadOutlined />
+                </template>
+                重置
+              </a-button>
+            </a-form-item>
+          </a-form>
+        </div>
       </div>
 
       <!-- 在工具栏中添加扫描按钮 -->
@@ -60,8 +67,11 @@
               <a-button type="primary" size="small" @click="handleViewBook(record)" ghost>
                 查看
               </a-button>
-              <a-button v-if="record.status === 1 && record.availableCount > 0" type="primary" size="small" @click="handleBorrowBook(record.id)">
+              <a-button v-if="record.status === 1 && record.availableCount > 0 && !userStore.isAdmin" type="primary" size="small" @click="handleBorrowBook(record.id)">
                 借阅
+              </a-button>
+              <a-button v-if="userStore.isAdmin" type="default" size="small" @click="handleBorrowInfo(record.id)">
+                借阅信息
               </a-button>
               <a-button v-if="userStore.isAdmin" type="default" size="small" @click="handleEditBook(record)">
                 编辑
@@ -192,8 +202,11 @@
         </div>
 
         <div class="flex justify-end">
-          <a-button v-if="currentBook.status === 1 && currentBook.availableCount > 0" type="primary" @click="handleBorrowBook(currentBook.id)">
+          <a-button v-if="currentBook.status === 1 && currentBook.availableCount > 0 && !userStore.isAdmin" type="primary" @click="handleBorrowBook(currentBook.id)">
             借阅
+          </a-button>
+          <a-button v-if="userStore.isAdmin" type="default" @click="handleBorrowInfo(currentBook.id)" class="ml-2">
+            借阅信息
           </a-button>
           <a-button @click="bookDetailVisible = false" class="ml-2">
             关闭
@@ -204,6 +217,27 @@
 
     <!-- 扫描器组件 -->
     <barcode-scanner v-model:visible="showScanner" @scan="handleScan" />
+
+    <!-- 借阅信息对话框 -->
+    <a-modal title="借阅信息" :visible="borrowInfoVisible" @cancel="borrowInfoVisible = false" @ok="borrowInfoVisible = false" width="800px">
+      <a-table :columns="borrowInfoColumns" :data-source="borrowInfos" :pagination="false" :loading="borrowInfoLoading" bordered>
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'status'">
+            <a-tag :color="record.status === 0 ? 'blue' : record.status === 1 ? 'green' : 'red'">
+              {{ record.status === 0 ? '已借阅' : record.status === 1 ? '已归还' : '逾期' }}
+            </a-tag>
+          </template>
+          <template v-if="column.key === 'fineStatus'">
+            <a-tag :color="record.fineStatus === 0 ? 'red' : 'green'">
+              {{ record.fineStatus === 0 ? '未缴纳' : '已缴纳' }}
+            </a-tag>
+          </template>
+        </template>
+      </a-table>
+      <div v-if="borrowInfos.length === 0" class="text-center py-4">
+        暂无借阅记录
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -214,7 +248,8 @@ import { message } from 'ant-design-vue'
 import {
   PlusOutlined,
   SearchOutlined,
-  ScanOutlined
+  ScanOutlined,
+  ReloadOutlined
 } from '@ant-design/icons-vue'
 import {
   getBookList,
@@ -224,7 +259,7 @@ import {
   getBookDetail,
   getBookByIsbn
 } from '@/api/book'
-import { borrowBook } from '@/api/borrow'
+import { borrowBook, getBorrowListByBookId } from '@/api/borrow'
 import dayjs from 'dayjs'
 import BarcodeScanner from '@/components/BarcodeScanner.vue'
 import { getBookInfoByIsbn } from '@/utils/book'
@@ -239,6 +274,11 @@ const confirmLoading = ref(false)
 const isEdit = ref(false)
 const currentBook = ref(null)
 const showScanner = ref(false)
+
+// 借阅信息
+const borrowInfoVisible = ref(false)
+const borrowInfoLoading = ref(false)
+const borrowInfos = ref([])
 
 // 分页
 const pagination = reactive({
@@ -325,6 +365,50 @@ const columns = [
     width: 300,
     key: 'action',
     fixed:'right'
+  }
+]
+
+// 借阅信息表格列定义
+const borrowInfoColumns = [
+  {
+    title: '借阅用户',
+    dataIndex: 'username',
+    key: 'username',
+    customRender: ({ text, record }) => record.username || record.realName || ''
+  },
+  {
+    title: '借阅时间',
+    dataIndex: 'borrowTime',
+    key: 'borrowTime',
+    customRender: ({ text }) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : ''
+  },
+  {
+    title: '应还时间',
+    dataIndex: 'returnTime',
+    key: 'returnTime',
+    customRender: ({ text }) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : ''
+  },
+  {
+    title: '实际还书时间',
+    dataIndex: 'actualReturnTime',
+    key: 'actualReturnTime',
+    customRender: ({ text }) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '未归还'
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    key: 'status'
+  },
+  {
+    title: '罚款状态',
+    dataIndex: 'fineStatus',
+    key: 'fineStatus'
+  },
+  {
+    title: '罚款金额',
+    dataIndex: 'fine',
+    key: 'fine',
+    customRender: ({ text }) => text ? `¥${text.toFixed(2)}` : '¥0.00'
   }
 ]
 
@@ -524,6 +608,23 @@ const handleBorrowBook = async (id) => {
   }
 }
 
+// 处理查看借阅信息
+const handleBorrowInfo = async (bookId) => {
+  try {
+    borrowInfoLoading.value = true
+    const res = await getBorrowListByBookId(bookId)
+    borrowInfos.value = res.data.records || []
+    // 关闭图书详情对话框，避免重叠
+    bookDetailVisible.value = false
+    borrowInfoVisible.value = true
+  } catch (error) {
+    console.error('获取借阅信息失败:', error)
+    message.error('获取借阅信息失败，请稍后重试')
+  } finally {
+    borrowInfoLoading.value = false
+  }
+}
+
 // 添加处理扫描结果的方法
 const handleScan = async (isbn) => {
   try {
@@ -602,5 +703,69 @@ onMounted(() => {
 
 .books-container :deep(.ant-table-bordered .ant-table-thead > tr > th) {
   border-color: #b4d3f7;
+}
+
+/* 搜索区域样式 */
+.search-card {
+  background: #f0f8ff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.search-item {
+  margin-bottom: 0;
+}
+
+.search-actions {
+  margin-bottom: 0;
+  display: flex;
+  gap: 8px;
+}
+
+.search-button {
+  background-color: #1890ff;
+  border-color: #1890ff;
+  transition: all 0.3s ease;
+}
+
+.search-button:hover {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
+}
+
+.reset-button {
+  transition: all 0.3s ease;
+}
+
+.reset-button:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+/* 表格样式 */
+.books-container :deep(.ant-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.books-container :deep(.ant-table-thead > tr > th) {
+  background-color: #f0f8ff;
+  font-weight: 600;
+}
+
+.books-container :deep(.ant-table-tbody > tr:hover > td) {
+  background-color: #f0f8ff;
+}
+
+.books-container :deep(.ant-table-tbody > tr > td) {
+  transition: background-color 0.3s ease;
 }
 </style>

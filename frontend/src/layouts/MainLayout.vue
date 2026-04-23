@@ -18,7 +18,7 @@
                 <a-menu-item key="books">
                     <router-link to="/books">
                         <book-outlined />
-                        <span>图书管理</span>
+                        <span>{{ userStore.isAdmin ? '图书管理' : '图书信息' }}</span>
                     </router-link>
                 </a-menu-item>
 
@@ -72,9 +72,7 @@
                 <div class="header-right">
                     <a-dropdown>
                         <a class="user-dropdown">
-                            <a-avatar>
-                                {{ userStore.userInfo?.username?.charAt(0)?.toUpperCase() || 'U' }}
-                            </a-avatar>
+                            <a-avatar :src="logoUrl" />
                             <span class="username">{{ userStore.userInfo?.username }}</span>
                         </a>
                         <template #overlay>
@@ -129,6 +127,8 @@ import {
     UserOutlined,
     LogoutOutlined
 } from '@ant-design/icons-vue'
+
+import logoUrl from '@/assets/logo.png'
 
 const route = useRoute()
 const router = useRouter()

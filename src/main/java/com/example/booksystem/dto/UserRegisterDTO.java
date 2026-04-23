@@ -39,4 +39,9 @@ public class UserRegisterDTO implements Serializable {
      */
     @Email(message = "邮箱格式不正确")
     private String email;
+
+    /**
+     * 用户类型：0-学生，1-教师
+     */
+    private Integer userType;
 }

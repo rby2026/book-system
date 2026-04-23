@@ -5,7 +5,7 @@
         <h2 class="text-xl font-bold">借阅管理</h2>
         <div>
           <a-radio-group v-model:value="viewMode" button-style="solid" class="mr-4">
-            <a-radio-button value="my">我的借阅</a-radio-button>
+            <a-radio-button v-if="!userStore.isAdmin" value="my">我的借阅</a-radio-button>
             <a-radio-button v-if="userStore.isAdmin" value="all">全部借阅</a-radio-button>
           </a-radio-group>
         </div>
@@ -13,30 +13,37 @@
 
       <!-- 搜索区域 -->
       <div class="search-area mb-4">
-        <a-form layout="inline" :model="searchForm">
-          <a-form-item label="图书名称">
-            <a-input v-model:value="searchForm.bookTitle" placeholder="请输入图书名称" allowClear/>
-          </a-form-item>
-          <a-form-item v-if="viewMode === 'all'" label="用户名">
-            <a-input v-model:value="searchForm.username" placeholder="请输入用户名" allowClear/>
-          </a-form-item>
-          <a-form-item label="状态">
-            <a-select v-model:value="searchForm.status" placeholder="请选择状态" style="width: 120px" allowClear>
-              <a-select-option v-for="option in statusOptions" :value="option.value" :key="option.value">
-                {{ option.label }}
-              </a-select-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" @click="handleSearch">
-              <search-outlined/>
-              搜索
-            </a-button>
-            <a-button class="ml-2" @click="resetSearch">
-              重置
-            </a-button>
-          </a-form-item>
-        </a-form>
+        <div class="search-card">
+          <a-form layout="inline" :model="searchForm" class="search-form">
+            <a-form-item label="图书名称" class="search-item">
+              <a-input v-model:value="searchForm.bookTitle" placeholder="请输入图书名称" allowClear/>
+            </a-form-item>
+            <a-form-item v-if="viewMode === 'all'" label="用户名" class="search-item">
+              <a-input v-model:value="searchForm.username" placeholder="请输入用户名" allowClear/>
+            </a-form-item>
+            <a-form-item label="状态" class="search-item">
+              <a-select v-model:value="searchForm.status" placeholder="请选择状态" style="width: 120px" allowClear>
+                <a-select-option v-for="option in statusOptions" :value="option.value" :key="option.value">
+                  {{ option.label }}
+                </a-select-option>
+              </a-select>
+            </a-form-item>
+            <a-form-item class="search-actions">
+              <a-button type="primary" @click="handleSearch" class="search-button">
+                <template #icon>
+                  <SearchOutlined/>
+                </template>
+                查询
+              </a-button>
+              <a-button class="reset-button" @click="resetSearch">
+                <template #icon>
+                  <ReloadOutlined/>
+                </template>
+                重置
+              </a-button>
+            </a-form-item>
+          </a-form>
+        </div>
       </div>
 
       <!-- 借阅列表 -->
@@ -176,7 +183,7 @@
 import {ref, reactive, onMounted, watch, computed} from 'vue'
 import {useUserStore} from '@/store/user'
 import {message} from 'ant-design-vue'
-import {SearchOutlined} from '@ant-design/icons-vue'
+import {SearchOutlined, ReloadOutlined} from '@ant-design/icons-vue'
 import dayjs from 'dayjs'
 import {
   getMyBorrowList,
@@ -190,7 +197,7 @@ import {
 const userStore = useUserStore()
 const loading = ref(false)
 const borrows = ref([])
-const viewMode = ref('my')
+const viewMode = ref(userStore.isAdmin ? 'all' : 'my')
 const borrowDetailVisible = ref(false)
 const currentBorrow = ref(null)
 
@@ -472,5 +479,69 @@ const statusOptions = [
 
 .borrows-container :deep(.ant-table-bordered .ant-table-thead > tr > th) {
   border-color: #b4d3f7;
+}
+
+/* 搜索区域样式 */
+.search-card {
+  background: #f0f8ff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.search-item {
+  margin-bottom: 0;
+}
+
+.search-actions {
+  margin-bottom: 0;
+  display: flex;
+  gap: 8px;
+}
+
+.search-button {
+  background-color: #1890ff;
+  border-color: #1890ff;
+  transition: all 0.3s ease;
+}
+
+.search-button:hover {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
+}
+
+.reset-button {
+  transition: all 0.3s ease;
+}
+
+.reset-button:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+/* 表格样式 */
+.borrows-container :deep(.ant-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.borrows-container :deep(.ant-table-thead > tr > th) {
+  background-color: #f0f8ff;
+  font-weight: 600;
+}
+
+.borrows-container :deep(.ant-table-tbody > tr:hover > td) {
+  background-color: #f0f8ff;
+}
+
+.borrows-container :deep(.ant-table-tbody > tr > td) {
+  transition: background-color 0.3s ease;
 }
 </style>

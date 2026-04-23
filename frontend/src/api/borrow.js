@@ -73,4 +73,17 @@ export function getHotBooks(limit = 10) {
         method: 'get',
         params: { limit }
     })
+}
+
+// 按图书ID查询借阅记录
+export function getBorrowListByBookId(bookId, params = {}) {
+    return request({
+        url: `/borrow/book/${bookId}`,
+        method: 'get',
+        params: {
+            current: 1,
+            size: 10,
+            ...params
+        }
+    })
 } 

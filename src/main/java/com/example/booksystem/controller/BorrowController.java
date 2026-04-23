@@ -104,4 +104,15 @@ public class BorrowController {
         List<Map<String, Object>> hotBooks = borrowService.getHotBooks(limit);
         return Result.success(hotBooks);
     }
+
+    @ApiOperation("按图书ID查询借阅记录")
+    @GetMapping("/book/{bookId}")
+    public Result<IPage<BorrowVO>> getBorrowsByBookId(
+            @ApiParam("图书ID") @PathVariable Long bookId,
+            @ApiParam("页码") @RequestParam(defaultValue = "1") Integer current,
+            @ApiParam("每页大小") @RequestParam(defaultValue = "10") Integer size) {
+        Page<Borrow> page = new Page<>(current, size);
+        IPage<BorrowVO> borrowPage = borrowService.pageAllBorrows(page, null, bookId, null, null, null);
+        return Result.success(borrowPage);
+    }
 }

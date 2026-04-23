@@ -33,6 +33,13 @@
                     <a-input v-model:value="registerForm.phone" placeholder="请输入手机号" />
                 </a-form-item>
 
+                <a-form-item name="userType" label="用户类型" :rules="[{ required: true, message: '请选择用户类型' }]">
+                    <a-radio-group v-model:value="registerForm.userType">
+                        <a-radio :value="0">学生</a-radio>
+                        <a-radio :value="1">教师</a-radio>
+                    </a-radio-group>
+                </a-form-item>
+
                 <a-form-item>
                     <a-button type="primary" html-type="submit" class="w-full" :loading="loading">
                         注册
@@ -64,7 +71,8 @@ const registerForm = reactive({
     password: '',
     confirmPassword: '',
     email: '',
-    phone: ''
+    phone: '',
+    userType: 0
 })
 
 const validatePassword = async (rule, value) => {

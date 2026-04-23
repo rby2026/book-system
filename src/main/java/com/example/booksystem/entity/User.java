@@ -56,6 +56,12 @@ public class User implements Serializable {
     private Integer role;
 
     /**
+     * 用户类型：0-学生，1-教师
+     */
+    @TableField("user_type")
+    private Integer userType;
+
+    /**
      * 账号状态：0-禁用，1-启用
      */
     private Integer status;

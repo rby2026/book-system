@@ -11,26 +11,33 @@
 
       <!-- 搜索区域 -->
       <div class="search-area mb-4">
-        <a-form layout="inline" :model="searchForm">
-          <a-form-item label="用户名">
-            <a-input v-model:value="searchForm.username" placeholder="请输入用户名" allowClear/>
-          </a-form-item>
-          <a-form-item label="状态">
-            <a-select v-model:value="searchForm.status" placeholder="请选择状态" style="width: 120px" allowClear>
-              <a-select-option :value="1">正常</a-select-option>
-              <a-select-option :value="0">禁用</a-select-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" @click="handleSearch">
-              <search-outlined/>
-              搜索
-            </a-button>
-            <a-button class="ml-2" @click="resetSearch">
-              重置
-            </a-button>
-          </a-form-item>
-        </a-form>
+        <div class="search-card">
+          <a-form layout="inline" :model="searchForm" class="search-form">
+            <a-form-item label="用户名" class="search-item">
+              <a-input v-model:value="searchForm.username" placeholder="请输入用户名" allowClear/>
+            </a-form-item>
+            <a-form-item label="状态" class="search-item">
+              <a-select v-model:value="searchForm.status" placeholder="请选择状态" style="width: 120px" allowClear>
+                <a-select-option :value="1">正常</a-select-option>
+                <a-select-option :value="0">禁用</a-select-option>
+              </a-select>
+            </a-form-item>
+            <a-form-item class="search-actions">
+              <a-button type="primary" @click="handleSearch" class="search-button">
+                <template #icon>
+                  <SearchOutlined/>
+                </template>
+                查询
+              </a-button>
+              <a-button class="reset-button" @click="resetSearch">
+                <template #icon>
+                  <ReloadOutlined/>
+                </template>
+                重置
+              </a-button>
+            </a-form-item>
+          </a-form>
+        </div>
       </div>
 
       <!-- 用户列表 -->
@@ -176,7 +183,7 @@
 import {ref, reactive, onMounted} from 'vue'
 import {useUserStore} from '@/store/user'
 import {message} from 'ant-design-vue'
-import {SearchOutlined, PlusOutlined} from '@ant-design/icons-vue'
+import {SearchOutlined, PlusOutlined, ReloadOutlined} from '@ant-design/icons-vue'
 import {getUserList, getUserById, updateUserStatus, createUser, updateUser, deleteUser} from '@/api/user'
 
 const userStore = useUserStore()
@@ -327,6 +334,11 @@ const handleLockUser = async (id) => {
       const res = await getUserById(id)
       currentUser.value = res.data
     }
+    
+    // 如果锁定的是当前登录用户，更新本地存储
+    if (id === userStore.userInfo?.id) {
+      await userStore.getUserInfo()
+    }
   } catch (error) {
     console.error('禁用用户失败:', error)
     message.error('禁用用户失败，请稍后重试')
@@ -344,6 +356,11 @@ const handleUnlockUser = async (id) => {
     if (userDetailVisible.value && currentUser.value?.id === id) {
       const res = await getUserById(id)
       currentUser.value = res.data
+    }
+    
+    // 如果解锁的是当前登录用户，更新本地存储
+    if (id === userStore.userInfo?.id) {
+      await userStore.getUserInfo()
     }
   } catch (error) {
     console.error('启用用户失败:', error)
@@ -424,6 +441,11 @@ const handleSubmitUser = () => {
         // 编辑用户
         await updateUser(userForm)
         message.success('编辑用户成功')
+        
+        // 如果修改的是当前登录用户的信息，更新本地存储
+        if (userForm.id === userStore.userInfo?.id) {
+          await userStore.getUserInfo()
+        }
       } else {
         // 新增用户
         await createUser(userForm)
@@ -480,5 +502,69 @@ onMounted(() => {
 
 .users-container :deep(.ant-table-bordered .ant-table-thead > tr > th) {
   border-color: #b4d3f7;
+}
+
+/* 搜索区域样式 */
+.search-card {
+  background: #f0f8ff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.search-item {
+  margin-bottom: 0;
+}
+
+.search-actions {
+  margin-bottom: 0;
+  display: flex;
+  gap: 8px;
+}
+
+.search-button {
+  background-color: #1890ff;
+  border-color: #1890ff;
+  transition: all 0.3s ease;
+}
+
+.search-button:hover {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
+}
+
+.reset-button {
+  transition: all 0.3s ease;
+}
+
+.reset-button:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+/* 表格样式 */
+.users-container :deep(.ant-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.users-container :deep(.ant-table-thead > tr > th) {
+  background-color: #f0f8ff;
+  font-weight: 600;
+}
+
+.users-container :deep(.ant-table-tbody > tr:hover > td) {
+  background-color: #f0f8ff;
+}
+
+.users-container :deep(.ant-table-tbody > tr > td) {
+  transition: background-color 0.3s ease;
 }
 </style>

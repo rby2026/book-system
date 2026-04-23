@@ -82,12 +82,15 @@ public class BorrowStatusTask {
         // 查询当前启用的借阅规则
         LambdaQueryWrapper<BorrowRule> ruleQuery = new LambdaQueryWrapper<>();
         ruleQuery.eq(BorrowRule::getStatus, 1);  // 启用状态
-        BorrowRule rule = borrowRuleService.getOne(ruleQuery);
+        List<BorrowRule> rules = borrowRuleService.list(ruleQuery);
         
-        if (rule == null) {
+        if (rules == null || rules.isEmpty()) {
             log.warn("未找到启用的借阅规则，无法计算罚款");
             return;
         }
+        
+        // 使用第一条启用的规则
+        BorrowRule rule = rules.get(0);
         
         // 查询所有已逾期未还的记录
         LambdaQueryWrapper<Borrow> overdueQuery = new LambdaQueryWrapper<>();

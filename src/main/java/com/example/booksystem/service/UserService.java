@@ -67,4 +67,12 @@ public interface UserService extends IService<User> {
      * @return UserVO
      */
     UserVO convertToUserVO(User user);
+
+    /**
+     * 更新用户类型
+     *
+     * @param userType 用户类型：0-学生，1-教师
+     * @return 更新结果
+     */
+    boolean updateUserType(Integer userType);
 }

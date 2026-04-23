@@ -44,6 +44,11 @@ public class UserVO implements Serializable {
     private Integer role;
 
     /**
+     * 用户类型：0-学生，1-教师
+     */
+    private Integer userType;
+
+    /**
      * 账号状态：0-禁用，1-启用
      */
     private Integer status;

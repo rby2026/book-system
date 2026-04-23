@@ -47,6 +47,17 @@ export function updatePassword(oldPassword, newPassword) {
     })
 }
 
+// 更新用户类型
+export function updateUserType(userType) {
+    return request({
+        url: '/user/userType',
+        method: 'put',
+        params: {
+            userType
+        }
+    })
+}
+
 // 获取用户列表（管理员）
 export function getUserList() {
     return request({
